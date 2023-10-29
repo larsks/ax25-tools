@@ -206,11 +206,14 @@ static int startiface(char *dev, struct hostent *hp)
 int main(int argc, char *argv[])
 {
 	int fd;
-	char dev[64];
+	char dev[64] = {0};
 	struct hostent *hp = NULL;
 
-	while ((fd = getopt(argc, argv, "i:m:v")) != -1) {
+	while ((fd = getopt(argc, argv, "d:i:m:v")) != -1) {
 		switch (fd) {
+        case 'd':
+            strncpy(dev, optarg, 64);
+            break;
 		case 'i':
 			hp = gethostbyname(optarg);
 			if (hp == NULL) {
@@ -230,7 +233,7 @@ int main(int argc, char *argv[])
 			return 0;
 		case ':':
 		case '?':
-			fprintf(stderr, "usage: nrattach [-i inetaddr] [-m mtu] [-v] port\n");
+			fprintf(stderr, "usage: nrattach [-d device] [-i inetaddr] [-m mtu] [-v] port\n");
 			return 1;
 		}
 	}
@@ -243,7 +246,7 @@ int main(int argc, char *argv[])
 	if (!readconfig(argv[optind]))
 		return 1;
 
-	if (!getfreedev(dev)) {
+	if (dev[0] == "\0" && !getfreedev(dev)) {
 		fprintf(stderr, "nrattach: cannot find free NET/ROM device\n");
 		return 1;
 	}
